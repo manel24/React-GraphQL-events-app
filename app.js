@@ -62,17 +62,26 @@ app.use('/graphql', graphqlHttp({
 
         },
         createEvent: (args) => {
+            let createdEvent;
             const event = new Event({
                 title: args.eventInput.title,
                 description: args.eventInput.description,
                 price: + args.eventInput.price,
-                date: new Date(args.eventInput.date)
+                date: new Date(args.eventInput.date),
+                creator: '5d429e1411731877626b90e3'
             })
             return event
                 .save().then(
                     result => {
-                        console.log(result)
-                        return { ...result._doc, _id: result.id };
+                        createdEvent = { ...result._doc, _id: result._doc._id.toString() }
+                        return User.findById('5d429e1411731877626b90e3')
+                            .then(user => {
+                                if (!user)
+                                    throw (new Error('User not found!'))
+                                user.createdEvents.push(event)
+                                return user.save()
+                            })
+                            .then(result => { return createdEvent })
                     }
 
                 )
@@ -84,21 +93,19 @@ app.use('/graphql', graphqlHttp({
                     if (user) {
                         throw new Error("user already exits!")
                     }
-                    hashedPasswd = bcrypt.hash(args.userInput.password, 12)
-                    return hashedPasswd
-                })
-                .then((pswd) => {
-                    const user = new User({ email: args.userInput.email, password: pswd })
-                    return user.save()
-                }
-                )
-                .then(
-                    result => {
-                        console.log(result)
-                        return { ...result._doc, _id: result.id, password: null };
-                    }
+                    return bcrypt.hash(args.userInput.password, 12).then(
+                        (hashedPasswd) => {
+                            const user = new User({ email: args.userInput.email, password: hashedPasswd })
+                            return user.save()
+                        }).then(
+                            (result) => {
+                                console.log(result)
+                                return { ...result._doc, _id: result.id, password: null };
+                            }
 
-                )
+                        )
+                })
+
                 .catch(err => { throw err });
         }
 
