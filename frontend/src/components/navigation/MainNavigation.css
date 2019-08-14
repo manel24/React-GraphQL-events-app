@@ -14,7 +14,8 @@ align-items: center;}
 }
 
 .main-navigation__items{
-    margin-left: 1.5rem;
+    position: absolute;
+    right:0;
    
 }
 
@@ -32,6 +33,7 @@ align-items: center;}
 
 .main-navigation__items a {
     margin: 0 1rem;
+    padding: 0.5rem;
 }
 .main-navigation__items a:visited, .main-navigation__items a:link {
     text-decoration: none;
@@ -39,7 +41,16 @@ align-items: center;}
     
 }
 
+.main-navigation__items a:last-child:visited, .main-navigation__items a:last-child:link {
+    color: #fff;
+    background: #01d1d1
+}
+.main-navigation__items a:first-child:visited, .main-navigation__items a:first-child:link {
+    background: #fff;
+    color: #01d1d1;
+}
+
 .main-navigation__items a:hover, .main-navigation__items a:active, .main-navigation__items a.active{
-    color: rgb(235, 178, 72);
+    color: #01d1d1;
 }
  

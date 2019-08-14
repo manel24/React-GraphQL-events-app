@@ -34,11 +34,11 @@ class App extends Component {
             <MainNavigation />
             <main className='main-content'>
               <Switch>
-                {!this.state.token && <Redirect path="/" to='/auth' exact> </Redirect>}
                 {!this.state.token && <Route path="/auth" component={AuthPage} />}
                 {this.state.token && <Redirect path="/" to='/events' exact> </Redirect>}
                 {this.state.token && <Redirect path="/auth" to='/events' exact> </Redirect>}
                 <Route path="/events" component={EventsPage} />
+                {!this.state.token && <Redirect to='/auth' exact> </Redirect>}
                 {this.state.token && <Route path="/bookings" component={BookingsPage} />}
               </Switch>
             </main>

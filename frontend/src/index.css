@@ -4,4 +4,54 @@ body {
   font-family: 'sans-serif';
 }
 
- 
+.form-control {
+  margin-bottom: 2rem;
+}
+
+.form-control label,
+.form-control input,
+.form-control textarea {
+  display: block;
+  width: 100%;
+}
+
+.form-control label {
+  margin-bottom: 2rem;
+}
+
+.form-control input{
+  height: 1.5rem;
+  border-radius: 2rem;
+}
+
+.form-control textarea{
+  border-radius: 2rem;
+}
+
+.form-actions{
+  text-align: center;
+}
+
+
+.form-actions button,
+.btn{
+  /* max-height: 3rem;
+  max-width: 10rem; */
+  background: #01d1d1;
+  font: inherit;
+  border: 1px solid #01d1d1;
+  border-radius: 3px;
+  padding:0.5 rem 1rem;
+  margin-right: 1rem;
+  box-shadow: 1px 1px 5px rgba(0,0,0,0.26);
+  color: white;
+  cursor: pointer;
+}
+
+.form-actions button:hover,
+.form-actions button:active,
+.btn:hover,
+.btn:active {
+  background: #198a8a;
+  border: #198a8a;
+}
