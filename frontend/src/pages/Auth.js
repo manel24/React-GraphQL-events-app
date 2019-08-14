@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import './Auth.css';
+import AuthContext from '../context/auth-context';
 
 class AuthPage extends Component {
 
+    static contextType = AuthContext;
     state = {
         isLogin: true
     }
@@ -51,7 +53,12 @@ class AuthPage extends Component {
                 throw new Error('Failed!');
             return res.json();
         })
-            .then(resData => { console.log(resData) })
+            .then(resData => {
+                console.log('resData', resData)
+                if (resData.data.login) {
+                    this.context.login(resData.data.login.token, resData.data.login.userId, resData.data.login.tokenExpiration)
+                }
+            })
             .catch(error => { console.log(error) })
         console.log(email, password);
 
