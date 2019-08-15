@@ -6,7 +6,7 @@ import AuthContext from '../context/auth-context';
 import './Events.css';
 
 class EventsPage extends Component {
-    state = { modalDisplay: false }
+    state = { modalDisplay: false, events: [] }
 
     static contextType = AuthContext;
     constructor(props) {
@@ -17,6 +17,10 @@ class EventsPage extends Component {
         this.dateElRef = React.createRef();
 
     }
+    componentDidMount() {
+        this.fetchEvents();
+    }
+
     displayModal = () => { this.setState({ modalDisplay: true }) }
     closeModal = () => { this.setState({ modalDisplay: false }) }
     confirmCreateEvent = (context) => {
@@ -51,47 +55,84 @@ class EventsPage extends Component {
         })
             .then(resData => {
                 console.log('resData', resData)
+                this.fetchEvents();
             })
             .catch(error => { console.log(error) })
-         this.setState({ modalDisplay: false })
+        this.setState({ modalDisplay: false })
+    }
+    fetchEvents = (context) => {
+        const requestBody = {
+            query: `
+            query  {events{
+                _id
+                title
+            }}
+            `
+        }
+        fetch('http://localhost:8000/graphql', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+        }).then(response => {
+            if (response.status !== 200 && response.status !== 201)
+                throw new Error('Failed!');
+            return response.json()
+        }
+        )
+            .then(result => {
+                console.log(result)
+                this.setState({ events: result.data.events })
+            })
+            .catch(error => {
+                console.log(error);
+
+            })
+
+
+
     }
     render() {
-        return (
-            <React.Fragment>
-                {this.state.modalDisplay &&
-                    (<React.Fragment>
-                        <Backdrop />
-                        <Modal title="add Event" canCancel canConfirm onCancel={this.closeModal} onConfirm={this.confirmCreateEvent}>
-                            <form>
-                                <div className="form-control">
-                                    <label htmlFor="title">Title</label>
-                                    <input type="title" id="title" ref={this.titleElRef}></input>
-                                </div>
-                                <div className="form-control">
-                                    <label htmlFor="price">Price</label>
-                                    <input type="number" id="price" min="0" ref={this.priceElRef}></input>
-                                </div>
-                                <div className="form-control">
-                                    <label htmlFor="date">Date</label>
-                                    <input type="datetime-local" id="date" ref={this.dateElRef}></input>
-                                </div>
-                                <div className="form-control">
-                                    <label htmlFor="description">Description</label>
-                                    <textarea id="description" rows="4" ref={this.descriptionElRef}></textarea>
-                                </div>
-                            </form>
-                        </Modal>
-                    </React.Fragment>
-                    )
+        const eventsList = this.state.events.map(event => {return (< li key={event._id} className="events__list-item">{event.title}</li>)});
+            return (    <React.Fragment>
+                    {this.state.modalDisplay &&
+                        (<React.Fragment>
+                            <Backdrop />
+                            <Modal title="add Event" canCancel canConfirm onCancel={this.closeModal} onConfirm={this.confirmCreateEvent}>
+                                <form>
+                                    <div className="form-control">
+                                        <label htmlFor="title">Title</label>
+                                        <input type="title" id="title" ref={this.titleElRef}></input>
+                                    </div>
+                                    <div className="form-control">
+                                        <label htmlFor="price">Price</label>
+                                        <input type="number" id="price" min="0" ref={this.priceElRef}></input>
+                                    </div>
+                                    <div className="form-control">
+                                        <label htmlFor="date">Date</label>
+                                        <input type="datetime-local" id="date" ref={this.dateElRef}></input>
+                                    </div>
+                                    <div className="form-control">
+                                        <label htmlFor="description">Description</label>
+                                        <textarea id="description" rows="4" ref={this.descriptionElRef}></textarea>
+                                    </div>
+                                </form>
+                            </Modal>
+                        </React.Fragment>
+                        )
 
-                }
-                <div className='events-control'>
-                    <p>Share your own events!</p>
-                    <button className='btn' onClick={this.displayModal}>Create event</button>
-                </div>
-            </React.Fragment>
-        )
-    }
+                    }
+                    <div className='events-control'>
+                        <p>Share your own events!</p>
+                        <button className='btn' onClick={this.displayModal}>Create event</button>
+                    </div>
+
+                    <ul className="events__list">
+                        {
+                            eventsList
+                        } 
+                    </ul>
+                </React.Fragment >
+            )
+        }
 }
 
-export default EventsPage;
+    export default EventsPage;
