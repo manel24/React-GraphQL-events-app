@@ -2,15 +2,13 @@ import React, { Component } from 'react';
 import AuthContext from '../context/auth-context';
 import Spinner from '../components/Spinner/Spinner';
 import BookingList from '../components/Bookings/BookingList/BookingList';
+import BookingChart from '../components/Bookings/BookingChart/BookingChart';
+import BookingControls from '../components/Bookings/BookingControls/BookingControls';
 
 class BookingsPage extends Component {
 
-    state = { bookings: [], isLoading: false }
+    state = { bookings: [], isLoading: false, outputType: 'list' }
     static contextType = AuthContext;
-
-    constructor(props) {
-        super(props);
-    }
 
     componentDidMount() {
         this.fetchBookings()
@@ -25,7 +23,8 @@ class BookingsPage extends Component {
                     event {
                         _id
                         title
-                        date }
+                        date
+                        price }
                     user {email}
                     createdAt
                     updatedAt
@@ -55,15 +54,16 @@ class BookingsPage extends Component {
     }
 
     onBookingDelete = (bookingId) => {
-        this.setState({isLoading:true})
+        this.setState({ isLoading: true })
         const requestBody = {
             query: `
-            mutation {
-                cancelBooking(bookingId: "${bookingId}") {
+            mutation cancelBooking ($id: ID!) {
+                cancelBooking(bookingId: $id) {
                     _id
                     title
                 }
-            }`
+            }`,
+            variables: { id: bookingId }
         }
         const token = this.context.token;
         fetch('http://localhost:8000/graphql', {
@@ -88,25 +88,36 @@ class BookingsPage extends Component {
             )
             .catch(error => {
                 console.log(error)
-                this.setState({isLoading:false})
+                this.setState({ isLoading: false })
             })
     }
 
+    changeOutputTypeHandler = (outputType) => {
+        if (this.state.outputType === 'list')
+            this.setState({ outputType: 'chart' })
+        else
+            this.setState({ outputType: 'list' })
+    }
+
     render() {
-        return (
-            <div>
-                {
+        let content = <Spinner />
+        if (!this.state.isLoading)
+            content = (
+                <React.Fragment>
+                    <div>
+                        <BookingControls changeOutputTypeHandler={this.changeOutputTypeHandler} activeOutputClass={this.state.outputType} />
+                    </div>
+                    <div>
+                        {this.state.outputType === 'list'
+                            ?
+                            <BookingList bookings={this.state.bookings} onDelete={this.onBookingDelete} />
+                            : <BookingChart bookings={this.state.bookings} />}
 
-                    this.state.isLoading && <Spinner />
+                    </div>
 
-                }
-                {
-                    this.state.bookings && !this.state.isLoading && <BookingList bookings={this.state.bookings} onDelete={this.onBookingDelete} />
-                }
-                {!this.state.isLoading && !this.state.bookings && 'No bookings added yet'}
-            </div>
-        )
-
+                </React.Fragment>
+            )
+        return <React.Fragment>{content}</React.Fragment>;
     }
 }
 export default BookingsPage;
